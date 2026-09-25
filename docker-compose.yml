@@ -1,0 +1,105 @@
+version: "3.9"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: ddd_app
+    working_dir: /var/www
+    volumes:
+      - ./:/var/www
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - ddd_net
+
+  nginx:
+    image: nginx:stable-alpine
+    container_name: ddd_nginx
+    ports:
+      - "89:80"
+    volumes:
+      - ./:/var/www
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app
+    networks:
+      - ddd_net
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: ddd_postgres
+    environment:
+      POSTGRES_DB: ddd_sla
+      POSTGRES_USER: ddd_user
+      POSTGRES_PASSWORD: ddd_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    networks:
+      - ddd_net
+
+  redis:
+    image: redis:7-alpine
+    container_name: ddd_redis
+    ports:
+      - "6388:6379"
+    networks:
+      - ddd_net
+
+  queue:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: ddd_queue
+    working_dir: /var/www
+    volumes:
+      - ./:/var/www
+    depends_on:
+      - app
+      - redis
+      - postgres
+    command: >
+      sh -c "if [ ! -f artisan ]; then
+               echo 'artisan not found in /var/www';
+               ls -la /var/www;
+               exit 1;
+             fi;
+             php artisan queue:work --tries=3 --sleep=1"
+    networks:
+      - ddd_net
+
+  pgadmin:
+    image: dpage/pgadmin4:8
+    container_name: ddd_pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - ddd_net
+
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: ddd_mailpit
+    ports:
+      - "8025:8025"  # Web UI
+      - "1025:1025"  # SMTP
+    networks:
+      - ddd_net
+
+volumes:
+  pg_data:
+  pgadmin_data:
+
+networks:
+  ddd_net:
+    driver: bridge

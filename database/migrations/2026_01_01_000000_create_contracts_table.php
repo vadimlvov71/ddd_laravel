@@ -1,0 +1,38 @@
+<?php
+
+declare(strict_types=1);
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+/**
+ * Create contracts table.
+ */
+return new class extends Migration {
+    /**
+     * Run migrations.
+     *
+     * @return void
+     */
+    public function up(): void
+    {
+        Schema::create('contracts', function (Blueprint $table): void {
+            $table->uuid('id')->primary();
+            $table->string('client_name');
+            $table->string('timezone', 64);
+            $table->boolean('is_active')->default(false);
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse migrations.
+     *
+     * @return void
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('contracts');
+    }
+};
