@@ -11,5 +11,5 @@
 * ```sh
       docker compose exec app php artisan test
 #### result:
-* ![изображение](https://https://github.com/vadimlvov71/ddd_laravel/blob/main/public/images/ddd_test.png)
+* ![изображение](https://github.com/vadimlvov71/ddd_laravel/blob/main/public/images/ddd_test.png)
   
