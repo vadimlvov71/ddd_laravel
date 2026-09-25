@@ -6,4 +6,10 @@
 * php 8.3
 * Laravel 13
 * Postgres
+
+##### run functional tests:
+* ```sh
+      docker compose exec app php artisan test
+#### result:
+* ![изображение](https://https://github.com/vadimlvov71/ddd_laravel/blob/main/public/images/ddd_test.png)
   
